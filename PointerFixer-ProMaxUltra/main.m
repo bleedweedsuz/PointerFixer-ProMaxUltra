@@ -23,7 +23,7 @@
  */
 void show_help(void) {
     printf("Usage:\n");
-    printf("  pfix  Reset the mouse pointer\n");
+    printf("  pfix                  Reset the mouse pointer\n");
     printf("  pfix --version or -v  Show version\n");
     printf("  pfix --help or -h     Show this help message\n");
 }
