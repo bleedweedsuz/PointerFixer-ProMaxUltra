@@ -1,0 +1,32 @@
+name: Build and Release pfix
+
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build pfix binary with Xcode
+        run: |
+          xcodebuild -scheme PointerFixer-ProMaxUltra -configuration Release
+          mkdir -p dist
+          cp build/Release/PointerFixer-ProMaxUltra dist/pfix
+          chmod +x dist/pfix
+
+      - name: Zip the binary
+        run: |
+          cd dist
+          zip pfix.zip pfix
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/pfix.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
