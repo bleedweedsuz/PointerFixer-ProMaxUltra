@@ -1,34 +1,39 @@
 name: Build and Release pfix
 
 on:
-  push:
-    tags:
-      - 'v*'
+    push:
+        tags:
+            - 'v*'
 
 jobs:
-  build-macos:
-    runs-on: macos-15
+    build-macos:
+        runs-on: macos-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Build pfix binary with Xcode
-        run: |
-            VERSION=${{ github.ref_name }}
-            xcodebuild -scheme PointerFixer-ProMaxUltra -configuration Release GCC_PREPROCESSOR_DEFINITIONS="VERSION_STRING=@\\\"$VERSION\\\""
-            mkdir -p dist
-            cp build/Release/PointerFixer-ProMaxUltra dist/pfix
-            chmod +x dist/pfix
+            - name: Build pfix binary with Xcode (No Code Signing)
+              run: |
+                  VERSION=${{ github.ref_name }}
+                  xcodebuild -scheme PointerFixer-ProMaxUltra \
+                             -configuration Release \
+                             CODE_SIGN_IDENTITY="" \
+                             CODE_SIGNING_REQUIRED=NO \
+                             CODE_SIGNING_ALLOWED=NO \
+                             GCC_PREPROCESSOR_DEFINITIONS="VERSION_STRING=@\\\"$VERSION\\\""
+                  mkdir -p dist
+                  cp build/Release/PointerFixer-ProMaxUltra dist/pfix
+                  chmod +x dist/pfix
 
-      - name: Zip the binary with version in the name
-        run: |
-            cd dist
-            zip "pfix-${{ github.ref_name }}.zip" pfix
+            - name: Zip the binary with version in the name
+              run: |
+                  cd dist
+                  zip "pfix-${{ github.ref_name }}.zip" pfix
 
-      - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-            files: dist/pfix-${{ github.ref_name }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Upload to GitHub Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: dist/pfix-${{ github.ref_name }}.zip
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
